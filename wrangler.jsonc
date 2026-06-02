@@ -1,14 +1,30 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "events-signup-api",
+  "main": "worker/src/index.ts",
   "compatibility_date": "2026-06-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "frontend/dist"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "events-signup",
+      "database_id": "ba7984db-a257-42d8-acdd-4b188c6273aa"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "f509d1c9af9f45eabb455b7e4ea4945e",
+      "preview_id": "f509d1c9af9f45eabb455b7e4ea4945e"
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGIN": "https://events.npole.org"
+  },
   "observability": {
     "enabled": true
-  },
-  "assets": {
-    "directory": "frontend"
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  }
 }

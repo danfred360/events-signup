@@ -7,7 +7,7 @@
     "build:frontend": "cd frontend && npm run build",
     "deploy:worker": "cd worker && npm run deploy",
     "scaffold": "node scripts/scaffold.js",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run build:frontend && wrangler deploy",
     "preview": "wrangler dev"
   },
   "volta": {

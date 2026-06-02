@@ -9,17 +9,22 @@ import {
   handleDeleteUser,
   handleSetUserPermissions,
 } from './handlers/admin';
+import { eventOgData } from '../../frontend/src/events/og-metadata';
 
 export interface Env {
   DB: D1Database;
   SESSIONS: KVNamespace;
   ALLOWED_ORIGIN: string;
+  ASSETS: Fetcher;
 }
 
 export interface Session {
   username: string;
   role: 'admin' | 'event_manager';
 }
+
+const BASE_URL = 'https://events.npole.org';
+const CRAWLER = /facebookexternalhit|Twitterbot|WhatsApp|LinkedInBot|Slackbot-LinkExpanding|Discordbot|TelegramBot|applebot|Googlebot/i;
 
 function getAllowedOrigin(request: Request, env: Env): string | null {
   const origin = request.headers.get('Origin') ?? '';
@@ -72,6 +77,51 @@ function adminOnly(response: Response, origin: string | null): Response {
   return addHeaders(Response.json({ success: false, message: 'Forbidden' }, { status: 403 }), origin);
 }
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function buildOgHtml(params: { title: string; description: string; url: string; image?: string }): string {
+  const t = escapeHtml(params.title);
+  const d = escapeHtml(params.description);
+  const u = escapeHtml(params.url);
+  const card = params.image ? 'summary_large_image' : 'summary';
+  return `<!doctype html><html><head>
+  <meta charset="UTF-8"><title>${t}</title>
+  <meta property="og:title" content="${t}">
+  <meta property="og:description" content="${d}">
+  <meta property="og:url" content="${u}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="events.npole.org">
+  ${params.image ? `<meta property="og:image" content="${escapeHtml(params.image)}">` : ''}
+  <meta name="twitter:card" content="${card}">
+  <meta name="twitter:title" content="${t}">
+  <meta name="twitter:description" content="${d}">
+  ${params.image ? `<meta name="twitter:image" content="${escapeHtml(params.image)}">` : ''}
+</head><body></body></html>`;
+}
+
+function ogResponse(pathname: string, href: string): Response | null {
+  const segments = pathname.replace(/^\/+/, '').split('/').filter(Boolean);
+  const slug = segments[0];
+  const isQR = segments[1] === 'qr';
+
+  if (!slug || slug === 'admin') return null;
+  const meta = eventOgData[slug];
+  if (!meta) return null;
+
+  const html = isQR
+    ? buildOgHtml({
+        title: `QR Code — ${meta.name}`,
+        description: `Scan to sign up for ${meta.name}`,
+        url: href,
+        image: `${BASE_URL}/qr-images/${slug}.png`,
+      })
+    : buildOgHtml({ title: meta.name, description: meta.description, url: href });
+
+  return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
@@ -84,82 +134,92 @@ export default {
 };
 
 async function handleRequest(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const method = request.method;
-    const origin = getAllowedOrigin(request, env);
+  const url = new URL(request.url);
+  const path = url.pathname;
+  const method = request.method;
+  const origin = getAllowedOrigin(request, env);
 
-    // CORS preflight
-    if (method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: origin ? corsHeaders(origin) : {},
-      });
+  // CORS preflight
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: origin ? corsHeaders(origin) : {},
+    });
+  }
+
+  // Non-API paths: serve OG page for crawlers, static assets for everyone else
+  if (!path.startsWith('/api/')) {
+    const ua = request.headers.get('User-Agent') ?? '';
+    if (CRAWLER.test(ua)) {
+      const og = ogResponse(path, url.href);
+      if (og) return og;
     }
+    return env.ASSETS.fetch(request);
+  }
 
-    // Public routes
-    const signupMatch = path.match(/^\/api\/events\/([^/]+)\/signup$/);
-    if (method === 'POST' && signupMatch) {
-      return addHeaders(await handleSignup(request, env, signupMatch[1]), origin);
-    }
+  // Public API routes
+  const signupMatch = path.match(/^\/api\/events\/([^/]+)\/signup$/);
+  if (method === 'POST' && signupMatch) {
+    return addHeaders(await handleSignup(request, env, signupMatch[1]), origin);
+  }
 
-    if (method === 'POST' && path === '/api/admin/login') {
-      return addHeaders(await handleLogin(request, env), origin);
-    }
+  if (method === 'POST' && path === '/api/admin/login') {
+    return addHeaders(await handleLogin(request, env), origin);
+  }
 
-    if (method === 'POST' && path === '/api/admin/logout') {
-      return addHeaders(await handleLogout(request, env), origin);
-    }
+  if (method === 'POST' && path === '/api/admin/logout') {
+    return addHeaders(await handleLogout(request, env), origin);
+  }
 
-    // All remaining routes require a valid session
-    if (!path.startsWith('/api/admin/')) {
-      return addHeaders(Response.json({ success: false, message: 'Not found' }, { status: 404 }), origin);
-    }
-
-    const session = await getSession(request, env);
-    if (!session) {
-      return addHeaders(Response.json({ success: false, message: 'Unauthorized' }, { status: 401 }), origin);
-    }
-
-    // ── Shared admin routes (admin + event_manager) ──────────────────────────
-
-    if (method === 'GET' && path === '/api/admin/events') {
-      return addHeaders(await handleAdminEvents(env, session), origin);
-    }
-
-    const signupsMatch = path.match(/^\/api\/admin\/events\/([^/]+)\/signups$/);
-    if (method === 'GET' && signupsMatch) {
-      return addHeaders(await handleAdminSignups(env, signupsMatch[1], session), origin);
-    }
-
-    const patchMatch = path.match(/^\/api\/admin\/signups\/([^/]+)$/);
-    if (method === 'PATCH' && patchMatch) {
-      return addHeaders(await handlePatchSignup(request, env, patchMatch[1], session), origin);
-    }
-
-    // ── Admin-only routes ────────────────────────────────────────────────────
-
-    if (method === 'GET' && path === '/api/admin/users') {
-      if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
-      return addHeaders(await handleGetUsers(env), origin);
-    }
-
-    if (method === 'POST' && path === '/api/admin/users') {
-      if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
-      return addHeaders(await handleCreateUser(request, env), origin);
-    }
-
-    const deleteUserMatch = path.match(/^\/api\/admin\/users\/([^/]+)$/);
-    if (method === 'DELETE' && deleteUserMatch) {
-      if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
-      return addHeaders(await handleDeleteUser(env, deleteUserMatch[1], session.username), origin);
-    }
-
-    const permissionsMatch = path.match(/^\/api\/admin\/users\/([^/]+)\/permissions$/);
-    if (method === 'PUT' && permissionsMatch) {
-      if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
-      return addHeaders(await handleSetUserPermissions(request, env, permissionsMatch[1]), origin);
-    }
-
+  // Admin routes — require session
+  if (!path.startsWith('/api/admin/')) {
     return addHeaders(Response.json({ success: false, message: 'Not found' }, { status: 404 }), origin);
+  }
+
+  const session = await getSession(request, env);
+  if (!session) {
+    return addHeaders(Response.json({ success: false, message: 'Unauthorized' }, { status: 401 }), origin);
+  }
+
+  // ── Shared admin routes (admin + event_manager) ──────────────────────────
+
+  if (method === 'GET' && path === '/api/admin/events') {
+    return addHeaders(await handleAdminEvents(env, session), origin);
+  }
+
+  const signupsMatch = path.match(/^\/api\/admin\/events\/([^/]+)\/signups$/);
+  if (method === 'GET' && signupsMatch) {
+    return addHeaders(await handleAdminSignups(env, signupsMatch[1], session), origin);
+  }
+
+  const patchMatch = path.match(/^\/api\/admin\/signups\/([^/]+)$/);
+  if (method === 'PATCH' && patchMatch) {
+    return addHeaders(await handlePatchSignup(request, env, patchMatch[1], session), origin);
+  }
+
+  // ── Admin-only routes ────────────────────────────────────────────────────
+
+  if (method === 'GET' && path === '/api/admin/users') {
+    if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
+    return addHeaders(await handleGetUsers(env), origin);
+  }
+
+  if (method === 'POST' && path === '/api/admin/users') {
+    if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
+    return addHeaders(await handleCreateUser(request, env), origin);
+  }
+
+  const deleteUserMatch = path.match(/^\/api\/admin\/users\/([^/]+)$/);
+  if (method === 'DELETE' && deleteUserMatch) {
+    if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
+    return addHeaders(await handleDeleteUser(env, deleteUserMatch[1], session.username), origin);
+  }
+
+  const permissionsMatch = path.match(/^\/api\/admin\/users\/([^/]+)\/permissions$/);
+  if (method === 'PUT' && permissionsMatch) {
+    if (session.role !== 'admin') return adminOnly(Response.json({}), origin);
+    return addHeaders(await handleSetUserPermissions(request, env, permissionsMatch[1]), origin);
+  }
+
+  return addHeaders(Response.json({ success: false, message: 'Not found' }, { status: 404 }), origin);
 }
