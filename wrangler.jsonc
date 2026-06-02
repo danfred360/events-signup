@@ -5,7 +5,8 @@
   "compatibility_date": "2026-06-02",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "frontend/dist"
+    "directory": "frontend/dist",
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {
