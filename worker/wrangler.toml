@@ -1,0 +1,22 @@
+name = "events-signup-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "events-signup"
+database_id = "FILL_AFTER_CREATE"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "FILL_AFTER_CREATE"
+preview_id = "FILL_AFTER_CREATE_PREVIEW"
+
+[vars]
+ALLOWED_ORIGIN = "https://events.npole.org"
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true

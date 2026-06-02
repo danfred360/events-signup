@@ -1,0 +1,15 @@
+{
+  "name": "events-signup",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:worker": "cd worker && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy:worker": "cd worker && npm run deploy",
+    "scaffold": "node scripts/scaffold.js"
+  },
+  "volta": {
+    "node": "22.12.0",
+    "npm": "11.9.0"
+  }
+}
