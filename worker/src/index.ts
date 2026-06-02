@@ -147,14 +147,19 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
     });
   }
 
-  // Non-API paths: serve OG page for crawlers, static assets for everyone else
+  // Non-API paths: serve OG page for crawlers, static assets for everyone else.
+  // Fall back to index.html for unknown paths so React Router handles routing.
   if (!path.startsWith('/api/')) {
     const ua = request.headers.get('User-Agent') ?? '';
     if (CRAWLER.test(ua)) {
       const og = ogResponse(path, url.href);
       if (og) return og;
     }
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (assetResponse.status === 404) {
+      return env.ASSETS.fetch(new Request(new URL('/index.html', request.url)));
+    }
+    return assetResponse;
   }
 
   // Public API routes
