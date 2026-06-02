@@ -6,10 +6,15 @@
     "dev:worker": "cd worker && npm run dev",
     "build:frontend": "cd frontend && npm run build",
     "deploy:worker": "cd worker && npm run deploy",
-    "scaffold": "node scripts/scaffold.js"
+    "scaffold": "node scripts/scaffold.js",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "volta": {
     "node": "22.12.0",
     "npm": "11.9.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.97.0"
   }
 }
