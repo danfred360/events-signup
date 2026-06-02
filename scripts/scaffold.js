@@ -166,6 +166,16 @@ registryContent = registryContent.replace(
 );
 fs.writeFileSync(registryPath, registryContent);
 
+// Append to frontend/src/events/og-metadata.ts
+const ogMetaPath = path.join(ROOT, 'frontend', 'src', 'events', 'og-metadata.ts');
+let ogMetaContent = fs.readFileSync(ogMetaPath, 'utf8');
+
+ogMetaContent = ogMetaContent.replace(
+  '  // OG_END',
+  `  '${slug}': {\n    name: '${name}',\n    description: 'Sign up for ${name}.',\n  },\n  // OG_END`
+);
+fs.writeFileSync(ogMetaPath, ogMetaContent);
+
 console.log(`
 Scaffolded event: "${name}" (${slug})
 
@@ -175,10 +185,12 @@ Created:
 
 Updated:
   frontend/src/events/index.ts
+  frontend/src/events/og-metadata.ts
   worker/src/events/registry.ts
 
 Next steps:
   1. Edit frontend/src/events/${slug}/config.ts to update fields
   2. Edit frontend/src/events/${slug}/Form.tsx to customize the form layout
-  3. Restart dev servers to pick up the new route
+  3. Edit frontend/src/events/og-metadata.ts to write a good preview description
+  4. Restart dev servers to pick up the new route
 `);

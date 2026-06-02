@@ -3,6 +3,7 @@ dist/
 .dev.vars
 *.local
 .wrangler/
+frontend/public/qr-images/
 
 .dev.vars*
 !.dev.vars.example

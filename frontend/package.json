@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/generate-qr-images.js",
     "build": "vite build",
     "preview": "vite preview"
   },
