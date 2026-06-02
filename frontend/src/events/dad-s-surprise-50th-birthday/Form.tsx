@@ -167,6 +167,14 @@ export default function DadSSurprise50thBirthdayForm() {
               New Holland, PA 17557
             </span>
           </div>
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <span>🍽️</span>
+            <span>Food provided by <a href="https://www.facebook.com/JonandMarias/" target="_blank" rel="noreferrer" style={{ color: BLUE, fontWeight: 600 }}>Jon and Maria's</a></span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <span>🏓🏐</span>
+            <span>Pickleball and volleyball courts on site</span>
+          </div>
         </div>
       </div>
 
