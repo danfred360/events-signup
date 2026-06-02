@@ -36,3 +36,16 @@ export function post<T>(path: string, body: unknown): Promise<T> {
 export function patch<T>(path: string, body: unknown): Promise<T> {
   return request<T>('PATCH', path, body);
 }
+
+export function put<T>(path: string, body: unknown): Promise<T> {
+  return request<T>('PUT', path, body);
+}
+
+export async function del(path: string): Promise<void> {
+  const res = await fetch(`${BASE}${path}`, { method: 'DELETE', credentials: 'include' });
+  if (res.status === 401) {
+    clearLoggedIn();
+    window.location.href = '/admin/login';
+    throw new Error('Session expired');
+  }
+}

@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { post } from '../utils/api';
 import { setLoggedIn } from '../utils/auth';
 
+interface LoginResponse {
+  success: boolean;
+  role: string;
+}
+
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -15,8 +20,8 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
     try {
-      await post('/admin/login', { username, password });
-      setLoggedIn();
+      const data = await post<LoginResponse>('/admin/login', { username, password });
+      setLoggedIn(data.role);
       navigate('/admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

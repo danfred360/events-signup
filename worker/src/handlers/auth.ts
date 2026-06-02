@@ -14,6 +14,23 @@ function hexToBytes(hex: string): Uint8Array {
   return bytes;
 }
 
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 100000 },
+    keyMaterial,
+    256
+  );
+  return `pbkdf2:${bytesToHex(salt)}:${bytesToHex(new Uint8Array(bits))}`;
+}
+
 async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const parts = storedHash.split(':');
   if (parts.length !== 3 || parts[0] !== 'pbkdf2') return false;
@@ -49,9 +66,9 @@ export async function handleLogin(request: Request, env: Env): Promise<Response>
     return Response.json({ success: false, message: 'Username and password are required' }, { status: 400 });
   }
 
-  const row = await env.DB.prepare('SELECT password_hash FROM admin_users WHERE username = ?')
+  const row = await env.DB.prepare('SELECT password_hash, role FROM admin_users WHERE username = ?')
     .bind(username)
-    .first<{ password_hash: string }>();
+    .first<{ password_hash: string; role: string }>();
 
   // Always run verifyPassword to prevent timing attacks
   const hashToCheck = row?.password_hash ?? 'pbkdf2:0000000000000000000000000000000000000000:0000000000000000000000000000000000000000000000000000000000000000';
@@ -63,12 +80,16 @@ export async function handleLogin(request: Request, env: Env): Promise<Response>
 
   const token = crypto.randomUUID();
   const SESSION_TTL = 86400; // 24 hours
-  await env.SESSIONS.put(token, JSON.stringify({ username }), { expirationTtl: SESSION_TTL });
+  await env.SESSIONS.put(
+    token,
+    JSON.stringify({ username, role: row.role }),
+    { expirationTtl: SESSION_TTL }
+  );
 
   const isSecure = env.ALLOWED_ORIGIN.startsWith('https');
   const cookieFlags = `HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL}${isSecure ? '; Secure' : ''}`;
 
-  return new Response(JSON.stringify({ success: true }), {
+  return new Response(JSON.stringify({ success: true, role: row.role }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',

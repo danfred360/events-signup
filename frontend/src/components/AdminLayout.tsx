@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../utils/api';
-import { clearLoggedIn } from '../utils/auth';
+import { clearLoggedIn, isAdmin } from '../utils/auth';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -18,7 +18,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="admin-layout">
       <nav className="admin-nav">
-        <Link to="/admin" className="nav-brand">Event Admin</Link>
+        <div className="nav-links">
+          <Link to="/admin" className="nav-brand">Event Admin</Link>
+          {isAdmin() && <Link to="/admin/users" className="nav-link">Users</Link>}
+        </div>
         <button onClick={logout} className="btn-link">Logout</button>
       </nav>
       <main className="admin-main">{children}</main>

@@ -9,8 +9,17 @@ CREATE TABLE IF NOT EXISTS signups (
 
 CREATE TABLE IF NOT EXISTS admin_users (
   username TEXT PRIMARY KEY,
-  password_hash TEXT NOT NULL
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'event_manager'
+);
+
+CREATE TABLE IF NOT EXISTS event_permissions (
+  username TEXT NOT NULL,
+  event_slug TEXT NOT NULL,
+  PRIMARY KEY (username, event_slug),
+  FOREIGN KEY (username) REFERENCES admin_users(username) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_signups_event_slug ON signups(event_slug);
 CREATE INDEX IF NOT EXISTS idx_signups_created_at ON signups(created_at);
+CREATE INDEX IF NOT EXISTS idx_event_permissions_username ON event_permissions(username);

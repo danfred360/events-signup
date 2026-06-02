@@ -210,3 +210,23 @@ button.btn:disabled {
 /* Not found */
 .not-found { text-align: center; padding-top: 6rem; }
 .not-found h1 { font-size: 5rem; margin: 0; }
+
+/* Admin nav links */
+.nav-links { display: flex; align-items: center; gap: 1.25rem; }
+.nav-link { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+.nav-link:hover { color: var(--text); }
+
+/* Users page */
+.create-user-section { margin-top: 2rem; }
+.create-user-section h3 { margin: 0 0 1rem; }
+
+/* Permissions dialog */
+.permissions-list { display: flex; flex-direction: column; gap: 0.625rem; margin-bottom: 1rem; }
+.permission-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  padding: 0.375rem 0;
+}
+.permission-row input[type="checkbox"] { width: 1rem; height: 1rem; flex-shrink: 0; }
