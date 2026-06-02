@@ -219,7 +219,7 @@ export default function DadSSurprise50thBirthdayForm() {
           </div>
 
           <div className="field">
-            <label htmlFor="guests" style={{ color: BLUE_DARK }}>Number of Guests</label>
+            <label htmlFor="guests" style={{ color: BLUE_DARK }}>How many additional people are you bringing?</label>
             <input
               id="guests"
               type="number"

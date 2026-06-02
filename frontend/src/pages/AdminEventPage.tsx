@@ -98,7 +98,19 @@ export default function AdminEventPage() {
 
       {!loading && !error && (
         <>
-          <p className="signup-count">{signups.length} signup{signups.length !== 1 ? 's' : ''}</p>
+          <p className="signup-count">
+            {signups.length} signup{signups.length !== 1 ? 's' : ''}
+            {(() => {
+              const guestTotal = signups.reduce((sum, s) => {
+                const g = Number(s.data.guests);
+                return sum + (Number.isFinite(g) && g > 0 ? g : 0);
+              }, 0);
+              const total = signups.length + guestTotal;
+              return guestTotal > 0
+                ? ` · ${total} total attendee${total !== 1 ? 's' : ''}`
+                : null;
+            })()}
+          </p>
           <div className="table-scroll">
             <table className="admin-table">
               <thead>

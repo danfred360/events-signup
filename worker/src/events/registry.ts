@@ -36,7 +36,7 @@ export const eventRegistry: EventConfig[] = [
     fields: [
       { name: 'fullName', label: 'Full Name', type: 'text', required: true },
       { name: 'email', label: 'Email Address', type: 'email', required: true },
-      { name: 'guests', label: 'Number of Guests', type: 'number', required: false },
+      { name: 'guests', label: 'Additional Guests', type: 'number', required: false },
       { name: 'notes', label: 'Notes or Questions', type: 'textarea', required: false },
     ],
   },
