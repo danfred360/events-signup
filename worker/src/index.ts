@@ -163,9 +163,9 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
       const og = ogResponse(path, url.href);
       if (og) return og;
     }
-    const assetResponse = await env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(url.href);
     if (assetResponse.status === 404) {
-      return env.ASSETS.fetch(new Request(new URL('/index.html', request.url)));
+      return env.ASSETS.fetch(new URL('/index.html', request.url).href);
     }
     return assetResponse;
   }
