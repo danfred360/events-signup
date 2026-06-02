@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="nav-links">
           <Link to="/admin" className="nav-brand">Event Admin</Link>
           {isAdmin() && <Link to="/admin/users" className="nav-link">Users</Link>}
+          <Link to="/" className="nav-link">← Site</Link>
         </div>
         <button onClick={logout} className="btn-link">Logout</button>
       </nav>
