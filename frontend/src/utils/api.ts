@@ -1,4 +1,4 @@
-import { clearLoggedIn } from './auth';
+import { clearLoggedIn, isLoggedIn } from './auth';
 
 const BASE = '/api';
 
@@ -10,7 +10,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 401) {
+  // Only redirect on 401 when the user had an active session — that means it expired.
+  // If the user isn't logged in (e.g. wrong password on the login page), fall through
+  // so the caller sees the actual error message from the response body.
+  if (res.status === 401 && isLoggedIn()) {
     clearLoggedIn();
     window.location.href = '/admin/login';
     throw new Error('Session expired');
@@ -43,7 +46,7 @@ export function put<T>(path: string, body: unknown): Promise<T> {
 
 export async function del(path: string): Promise<void> {
   const res = await fetch(`${BASE}${path}`, { method: 'DELETE', credentials: 'include' });
-  if (res.status === 401) {
+  if (res.status === 401 && isLoggedIn()) {
     clearLoggedIn();
     window.location.href = '/admin/login';
     throw new Error('Session expired');

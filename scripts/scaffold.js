@@ -71,7 +71,7 @@ export default function ${pascal}Form() {
     e.preventDefault();
     setStatus('loading');
     try {
-      await post(\`/api/events/\${config.slug}/signup\`, fields);
+      await post(\`/events/\${config.slug}/signup\`, fields);
       setStatus('success');
       setMessage("You're signed up! See you there.");
     } catch (err) {

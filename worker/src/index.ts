@@ -74,6 +74,16 @@ function adminOnly(response: Response, origin: string | null): Response {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    try {
+      return await handleRequest(request, env);
+    } catch (err) {
+      console.error(err);
+      return Response.json({ success: false, message: 'Internal server error' }, { status: 500 });
+    }
+  },
+};
+
+async function handleRequest(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
@@ -152,5 +162,4 @@ export default {
     }
 
     return addHeaders(Response.json({ success: false, message: 'Not found' }, { status: 404 }), origin);
-  },
-};
+}

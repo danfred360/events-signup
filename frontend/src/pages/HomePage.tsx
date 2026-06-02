@@ -16,6 +16,9 @@ export default function HomePage() {
           </li>
         ))}
       </ul>
+      <footer className="home-footer">
+        <Link to="/admin/login" className="admin-link">Admin</Link>
+      </footer>
     </div>
   );
 }

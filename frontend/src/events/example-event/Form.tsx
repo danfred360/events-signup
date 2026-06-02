@@ -14,7 +14,7 @@ export default function ExampleEventForm() {
     e.preventDefault();
     setStatus('loading');
     try {
-      await post(`/api/events/${config.slug}/signup`, fields);
+      await post(`/events/${config.slug}/signup`, fields);
       setStatus('success');
       setMessage("You're signed up! See you there.");
     } catch (err) {
@@ -39,7 +39,15 @@ export default function ExampleEventForm() {
       </div>
       <div className="field">
         <label htmlFor="phone">Phone Number</label>
-        <input id="phone" type="tel" value={fields.phone ?? ''} onChange={set('phone')} />
+        <input
+          id="phone"
+          type="tel"
+          pattern="[\d\s\-\+\(\)\.]{7,20}"
+          title="Enter a valid phone number"
+          placeholder="e.g. (555) 123-4567"
+          value={fields.phone ?? ''}
+          onChange={set('phone')}
+        />
       </div>
       <div className="field">
         <label htmlFor="guests">Number of Guests</label>
