@@ -29,8 +29,8 @@ export const eventRegistry: EventConfig[] = [
     ],
   },
   {
-    slug: 'dad-s-surprise-50th-birthday',
-    name: "Dad's Surprise 50th Birthday",
+    slug: 'dan-surprise-50th-birthday',
+    name: "Dan's Surprise 50th Birthday",
     description: "A surprise celebration for a very special 50th!",
     date: 'July 19, 2026',
     fields: [

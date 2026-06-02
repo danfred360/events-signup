@@ -151,7 +151,7 @@ export default function DadSSurprise50thBirthdayForm() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', color: '#1e3a5f', lineHeight: 1.5 }}>
           <div style={{ display: 'flex', gap: '0.625rem' }}>
             <span>📅</span>
-            <span><strong>Saturday, July 19, 2026</strong></span>
+            <span><strong>Sunday, July 19, 2026</strong></span>
           </div>
           <div style={{ display: 'flex', gap: '0.625rem' }}>
             <span>⚠️</span>
