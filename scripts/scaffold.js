@@ -21,7 +21,9 @@ function toPascalCase(slug) {
 }
 
 function toVarName(slug) {
-  return slug.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  return slug
+    .replace(/-([a-z])/g, (_, c) => c.toUpperCase())
+    .replace(/-/g, ''); // remove hyphens before digits (e.g. -50th → 50th)
 }
 
 const name = process.argv[2];
