@@ -124,7 +124,7 @@ export default function AdminEventPage() {
               <tbody>
                 {signups.map(signup => (
                   <tr key={signup.id}>
-                    <td className="nowrap">{new Date(signup.created_at).toLocaleString()}</td>
+                    <td className="nowrap">{new Date(signup.created_at.endsWith('Z') ? signup.created_at : signup.created_at + 'Z').toLocaleString()}</td>
                     {fields.map(f => (
                       <td key={f.name}>{String(signup.data[f.name] ?? '')}</td>
                     ))}
