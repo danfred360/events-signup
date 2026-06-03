@@ -178,6 +178,26 @@ export default function DadSSurprise50thBirthdayForm() {
         </div>
       </div>
 
+      {/* Surprise reminder */}
+      <div style={{
+        background: '#fefce8',
+        border: '1px solid #fde68a',
+        borderRadius: '10px',
+        padding: '0.875rem 1.125rem',
+        marginBottom: '1.75rem',
+        display: 'flex',
+        gap: '0.625rem',
+        alignItems: 'flex-start',
+        fontSize: '0.9rem',
+        color: '#78350f',
+        lineHeight: 1.5,
+      }}>
+        <span style={{ flexShrink: 0 }}>🤫</span>
+        <span>
+          <strong>Keep it a secret!</strong> Please avoid texting Jenna about the party — Dan may see messages on her phone.
+        </span>
+      </div>
+
       {/* Form */}
       <div style={{
         background: '#fff',
