@@ -40,7 +40,14 @@ export default function SpotifyCallback() {
       return;
     }
 
-    const state = JSON.parse(raw) as SpotifyPkceState;
+    let state: SpotifyPkceState;
+    try {
+      state = JSON.parse(raw) as SpotifyPkceState;
+    } catch {
+      setErrorMsg('Session state was corrupted — please try again from the admin page.');
+      setStatus('error');
+      return;
+    }
     sessionStorage.removeItem(SPOTIFY_CALLBACK_KEY);
     setEventSlug(state.eventSlug);
 

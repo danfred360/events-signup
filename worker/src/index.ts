@@ -154,7 +154,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   // Fall back to index.html for unknown paths so React Router handles routing.
   if (!path.startsWith('/api/')) {
     // Redirect unauthenticated browser requests to admin pages to the login page.
-    if (path.startsWith('/admin') && path !== '/admin/login') {
+    if (path.startsWith('/admin') && path !== '/admin/login' && path !== '/admin/spotify-callback') {
       const session = await getSession(request, env);
       if (!session) {
         return Response.redirect(new URL('/admin/login', request.url).href, 302);

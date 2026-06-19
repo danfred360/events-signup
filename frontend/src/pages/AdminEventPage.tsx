@@ -212,7 +212,7 @@ export default function AdminEventPage() {
               {signups.length} signup{signups.length !== 1 ? 's' : ''}
               {(() => {
                 const guestTotal = signups.reduce((sum, s) => {
-                  const g = Number(s.data.guests);
+                  const g = Number(s.data.guests ?? s.data.additionalGuests);
                   return sum + (Number.isFinite(g) && g > 0 ? g : 0);
                 }, 0);
                 const total = signups.length + guestTotal;
