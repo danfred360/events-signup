@@ -1,7 +1,7 @@
 export interface EventField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'tel' | 'number' | 'select' | 'checkbox' | 'textarea';
+  type: 'text' | 'email' | 'tel' | 'number' | 'select' | 'checkbox' | 'textarea' | 'song-recommendations';
   required: boolean;
   options?: readonly string[];
 }

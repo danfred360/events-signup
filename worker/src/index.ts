@@ -1,5 +1,6 @@
 import { handleLogin, handleLogout } from './handlers/auth';
 import { handleSignup } from './handlers/signup';
+import { handleSpotifyConfig, handleSpotifySearch } from './handlers/spotify';
 import {
   handleAdminEvents,
   handleAdminSignups,
@@ -16,6 +17,8 @@ export interface Env {
   SESSIONS: KVNamespace;
   ALLOWED_ORIGIN: string;
   ASSETS: Fetcher;
+  SPOTIFY_CLIENT_ID?: string;
+  SPOTIFY_CLIENT_SECRET?: string;
 }
 
 export interface Session {
@@ -171,6 +174,14 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   }
 
   // Public API routes
+  if (method === 'GET' && path === '/api/spotify/config') {
+    return addHeaders(handleSpotifyConfig(env), origin);
+  }
+
+  if (method === 'GET' && path === '/api/spotify/search') {
+    return addHeaders(await handleSpotifySearch(request, env), origin);
+  }
+
   const signupMatch = path.match(/^\/api\/events\/([^/]+)\/signup$/);
   if (method === 'POST' && signupMatch) {
     return addHeaders(await handleSignup(request, env, signupMatch[1]), origin);

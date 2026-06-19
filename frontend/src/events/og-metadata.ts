@@ -9,5 +9,9 @@ export const eventOgData: Record<string, { name: string; description: string }> 
     name: "Dan's Surprise 50th Birthday 🎂",
     description: 'Join us for a surprise 50th birthday celebration on July 19, 2026 in New Holland, PA!',
   },
+  'july-house-party-on-west-end-ave': {
+    name: 'July House Party on West End Ave 🎉',
+    description: 'Summer house party on July 24th, 2026. RSVP and add your song picks for the playlist!',
+  },
   // OG_END
 };

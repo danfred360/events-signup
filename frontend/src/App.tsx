@@ -7,6 +7,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEventPage from './pages/AdminEventPage';
 import AdminUsersPage from './pages/AdminUsersPage';
+import SpotifyCallback from './pages/SpotifyCallback';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 
@@ -36,6 +37,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AdminUsersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/spotify-callback"
+        element={
+          <ProtectedRoute>
+            <SpotifyCallback />
           </ProtectedRoute>
         }
       />
