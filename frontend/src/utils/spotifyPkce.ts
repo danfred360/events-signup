@@ -24,7 +24,7 @@ export function buildAuthUrl(clientId: string, redirectUri: string, challenge: s
     client_id: clientId,
     response_type: 'code',
     redirect_uri: redirectUri,
-    scope: 'playlist-modify-public playlist-modify-private',
+    scope: 'playlist-modify-public',
     code_challenge_method: 'S256',
     code_challenge: challenge,
   });
@@ -63,16 +63,15 @@ export async function createPlaylistFromTracks(
 ): Promise<string> {
   const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
 
-  const meRes = await fetch('https://api.spotify.com/v1/me', { headers });
-  if (!meRes.ok) throw new Error('Failed to get Spotify user profile');
-  const me = await meRes.json() as { id: string };
-
-  const playlistRes = await fetch(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
+  const playlistRes = await fetch('https://api.spotify.com/v1/me/playlists', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ name: playlistName, public: false }),
+    body: JSON.stringify({ name: playlistName, public: true }),
   });
-  if (!playlistRes.ok) throw new Error('Failed to create playlist');
+  if (!playlistRes.ok) {
+    const err = await playlistRes.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(err.error?.message ?? `Failed to create playlist (${playlistRes.status})`);
+  }
   const playlist = await playlistRes.json() as { id: string; external_urls: { spotify: string } };
 
   // Spotify allows max 100 tracks per request
@@ -84,7 +83,10 @@ export async function createPlaylistFromTracks(
       headers,
       body: JSON.stringify({ uris: batch }),
     });
-    if (!addRes.ok) throw new Error('Failed to add tracks to playlist');
+    if (!addRes.ok) {
+      const err = await addRes.json().catch(() => ({})) as { error?: { message?: string } };
+      throw new Error(err.error?.message ?? `Failed to add tracks (${addRes.status})`);
+    }
   }
 
   return playlist.external_urls.spotify;
